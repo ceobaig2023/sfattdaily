@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-color: #f4f4f4;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+        }
+        button {
+            padding: 8px 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            color: white;
+        }
+        .call-btn {
+            background: #28a745;
+        }
+        .call-btn:hover {
+            background: #218838;
+        }
+        .whatsapp-btn {
+            background: #25D366;
+        }
+        .whatsapp-btn:hover {
+            background: #1EBE57;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background: #007bff;
+            color: white;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="home">
+        <h2>All Students</h2>
+        <table>
+            <thead>
+                <tr>
+                    
+                    <th>Roll No</th>
+                    <th>Name</th>
+                    <th>Class</th>
+                    <th>Attendance</th>
+                    <th>Contact</th>
+                    <th>Call</th>
+                    <th>WhatsApp</th>
+                </tr>
+            </thead>
+            <tbody id="studentList"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const apiBaseUrl = "https://script.google.com/macros/s/AKfycbwVOzYi40XE3g32icmMeg9GDKJGGWbTokTXXt58SQTLvNWqweIk-1h0Ri1ZQzW6yQ7T/exec";
+      //  const apiBaseUrl = "https://script.google.com/macros/s/AKfycbwVOzYi40XE3g32icmMeg9GDKJGGWbTokTXXt58SQTLvNWqweIk-1h0Ri1ZQzW6yQ7T/exec";
+
+
+
+async function fetchStudents() {
+    const response = await fetch(`${apiBaseUrl}?action=getTodaysAttendance&org=focus`);
+    const students = await response.json();
+    const list = document.getElementById("studentList");
+
+    list.innerHTML = students.map(s => `
+        <tr>
+            <td>${s.id}</td>
+            <td>${s.name}</td>
+            <td>${s.class}</td>
+            <td style="color: ${s.attendance === 'A' ? 'red' : 'green'}; font-weight: bold;">
+                ${s.attendance}
+            </td>
+            <td>${s.contact}</td>
+            <td><button class="call-btn" onclick="makeCall('${s.contact}')">📞 Call</button></td>
+            <td><button class="whatsapp-btn" onclick="sendWhatsApp('${s.contact}')">💬 WhatsApp</button></td>
+        </tr>
+    `).join('');
+}
+
+        function makeCall(number) {
+            window.location.href = `tel:${number}`;
+        }
+
+        function sendWhatsApp(number) {
+            const message = encodeURIComponent("Please don't miss Important class");
+            window.open(`https://wa.me/${number}?text=${message}`, '_blank');
+        }
+
+        fetchStudents();
+    </script>
+
+</body>
+</html>
