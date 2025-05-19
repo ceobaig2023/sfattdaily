@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-color: #f4f4f4;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+        }
+        button, input[type="submit"] {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+            width: 100%;
+            border-radius: 5px;
+        }
+        button:hover, input[type="submit"]:hover {
+            background: #218838;
+        }
+        .hidden { display: none; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background: #28a745;
+            color: white;
+        }
+        .radio-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .input-field {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        /* Navigation Panel Styles */
+        .nav-buttons {
+            position: relative;
+        }
+        .menu-icon {
+            display: none;
+            cursor: pointer;
+            font-size: 30px;
+            padding: 10px;
+        }
+        .menu-icon span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            margin: 5px auto;
+            background-color: #333;
+        }
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .nav-links button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .nav-links button:hover {
+            background: #0056b3;
+        }
+
+        /* Mobile Specific Styles */
+        @media screen and (max-width: 768px) {
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 50px;
+                right: 20px;
+                background-color: white;
+                padding: 10px;
+                border-radius: 5px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+            .nav-links.active {
+                display: flex;
+            }
+            .menu-icon {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav-buttons">
+        <div class="menu-icon" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="nav-links">
+            <!-- <button onclick="showPage('home')">🏠 Home</button> -->
+            <!-- <button onclick="showPage('addStudent')">➕ Add Student</button> -->
+            <button onclick="showPage('takeAttendance')">📋 Focus Attendance</button>
+            <button onclick="showPage('takeAttendanceSublime')">📋 Sublime Attendance</button>
+            <button onclick="showPage('viewAttendance')">📊 View Attendance</button>
+            <button onclick="showPage('viewAttendanceSublime')">📊 View Attendance Sublime</button>
+
+        </div>
+    </div>
+
+    <!-- <div class="container hidden" id="home">
+        <h2>All Students</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Roll No</th>
+                    <th>Name</th>
+                    <th>Class</th>
+                </tr>
+            </thead>
+            <tbody id="studentList"></tbody>
+        </table>
+    </div> -->
+
+    <!-- <div class="container hidden" id="addStudent">
+        <h2>Add New Student</h2>
+        <form onsubmit="addStudent(event)">
+            <input type="text" class="input-field" id="rollNo" placeholder="Roll No" required>
+            <input type="text" class="input-field" id="name" placeholder="Name" required>
+            <input type="text" class="input-field" id="class" placeholder="Class" required>
+            <input type="text" class="input-field" id="contact" placeholder="Contact" required>
+            <input type="submit" value="Add Student">
+        </form>
+    </div> -->
+
+    <div class="container hidden" id="takeAttendance">
+        <h2>Mark Attendance FOCUS</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Roll No</th>
+                    <th>Name</th>
+                    <th>Class</th>
+                    <th>Attendance</th>
+                </tr>
+            </thead>
+            <tbody id="attendanceList"></tbody>
+        </table>
+        <button id="submitBtn" onclick="submitAttendance()">Submit Focus Attendance</button>
+        <p id="waitMessageSublime" style="color: red; display: none;">Please wait, submitting attendance...</p>
+    </div>
+
+    <div class="container hidden" id="takeAttendanceSublime">
+        <h2>Mark Attendance Sublime</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Roll No</th>
+                    <th>Name</th>
+                    <th>Class</th>
+                    <th>Attendance</th>
+                </tr>
+            </thead>
+            <tbody id="attendanceListSublime"></tbody>
+        </table>
+        <button id="submitBtnSublime" onclick="submitAttendanceSublime()">Submit Sublime Attendance</button>
+        <p id="waitMessageSublime" style="color: red; display: none;">Please wait, submitting attendance...</p>
+    </div>    
+
+    <div class="container hidden" id="viewAttendance">
+        <h2>Attendance Summary</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Present</th>
+                    <th>Absent</th>
+                </tr>
+            </thead>
+            <tbody id="attendanceSummary"></tbody>
+        </table>
+    </div>
+    <div class="container hidden" id="viewAttendanceSublime">
+        <h2>Attendance Summary Sublime</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Present</th>
+                    <th>Absent</th>
+                </tr>
+            </thead>
+            <tbody id="attendanceSummarySublime"></tbody>
+        </table>
+    </div>    
+
+    <script>
+        const apiBaseUrl = "https://script.google.com/macros/s/AKfycbyU1G5on4jYOQp0E-K41jMCDq_iQch5Cc9JcF5igtxe6SLFPUjsn0HyobfHMcchMUQ78Q/exec";
+
+        function showPage(pageId) {
+            document.querySelectorAll('.container').forEach(el => el.classList.add('hidden'));
+            document.getElementById(pageId).classList.remove('hidden');
+
+            // if (pageId === 'home') fetchStudents();
+            // if (pageId === 'takeAttendance') fetchAttendanceList();
+            // if (pageId === 'takeAttendanceSublime') fetchAttendanceListSublime();
+            // if (pageId === 'viewAttendance') fetchAttendanceSummary();
+
+          if (pageId === 'takeAttendance') {
+               fetchAttendanceList();
+          } else if (pageId === 'takeAttendanceSublime') {
+               fetchAttendanceListSublime();
+          } else if (pageId === 'viewAttendance') {
+               fetchAttendanceSummary();
+          }else if (pageId === 'viewAttendanceSublime') {
+               fetchAttendanceSummarySublime();
+          }
+        }
+
+        // async function fetchStudents() {
+        //     const response = await fetch(`${apiBaseUrl}?action=getStudents&org=focus`);
+        //     const students = await response.json();
+        //     const list = document.getElementById("studentList");
+        //     list.innerHTML = students.map(s => `<tr><td>${s.rollNo}</td><td>${s.name}</td><td>${s.class}</td></tr>`).join('');
+        // }
+
+        // async function addStudent(event) {
+        //     event.preventDefault();
+        //     const rollNo = document.getElementById("rollNo").value;
+        //     const name = document.getElementById("name").value;
+        //     const classValue = document.getElementById("class").value;
+
+        //     await fetch(`${apiBaseUrl}?action=addStudent`, {
+        //         method: "POST",
+        //         body: JSON.stringify({ rollNo, name, class: classValue })
+        //     });
+
+        //     alert("Student added!");
+        //     showPage('home');
+        // }
+        //Get List of of F Students
+        async function fetchAttendanceList() {
+            const response = await fetch(`${apiBaseUrl}?action=getStudents&org=focus`);
+            const students = await response.json();
+            const list = document.getElementById("attendanceList");
+            list.innerHTML = students.map(s => `
+                <tr>
+                    <td>${s.rollNo}</td>
+                    <td>${s.name}</td>
+                    <td>${s.class}</td>
+                    <td class="radio-group">
+                        <label><input type="radio" name="att_${s.rollNo}" value="P" checked> P</label>
+                        <label><input type="radio" name="att_${s.rollNo}" value="A"> A</label>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        async function fetchAttendanceListSublime() {
+            const response = await fetch(`${apiBaseUrl}?action=getStudents&org=sublime`);
+            const students = await response.json();
+            const list = document.getElementById("attendanceListSublime");
+            list.innerHTML = students.map(s => `
+                <tr>
+                    <td>${s.rollNo}</td>
+                    <td>${s.name}</td>
+                    <td>${s.class}</td>
+                    <td class="radio-group">
+                        <label><input type="radio" name="att_${s.rollNo}" value="P" checked> P</label>
+                        <label><input type="radio" name="att_${s.rollNo}" value="A"> A</label>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        // async function submitAttendance() {
+        //     const date = new Date().toISOString().split("T")[0];
+        //     const rows = document.querySelectorAll("#attendanceList tr");
+        //     const attendanceData = [];
+
+        //     rows.forEach(row => {
+        //         const rollNo = row.cells[0].textContent;
+        //         const attendance = row.querySelector(`input[name="att_${rollNo}"]:checked`).value;
+        //         attendanceData.push({ date, rollNo, attendance });
+        //     });
+
+        //     await fetch(`${apiBaseUrl}?action=markAttendance&org=focus`, {
+        //         method: "POST",
+        //         body: JSON.stringify(attendanceData)
+        //     });
+
+        //     alert("Attendance Focus submitted for Today");
+        // }
+
+        async function submitAttendance() {
+           const submitBtn = document.getElementById("submitBtn");
+    
+          // Disable button to prevent multiple clicks
+           submitBtn.disabled = true;
+           submitBtn.textContent = "Submitting...";
+
+           try {
+                const date = new Date().toISOString().split("T")[0];
+                const rows = document.querySelectorAll("#attendanceList tr");
+                const attendanceData = [];
+                
+
+            rows.forEach(row => {
+            const rollNo = row.cells[0].textContent;
+            const attendance = row.querySelector(`input[name="att_${rollNo}"]:checked`).value;
+            attendanceData.push({ date, rollNo, attendance });
+            });
+
+           await fetch(`${apiBaseUrl}?action=markAttendance&org=focus`, {
+              method: "POST",
+            //    headers: {
+            //     "Content-Type": "application/json"
+            // },
+              body: JSON.stringify(attendanceData)
+             });
+
+            alert("Attendance Focus submitted for Today");
+            } catch (error) {
+            console.error("Error submitting attendance:", error);
+            alert("Failed to submit attendance. Please try again.");
+            } finally {
+            // Re-enable button after completion
+            submitBtn.disabled = false;
+             submitBtn.textContent = "Submit Focus Attendance";
+          }
+        }
+
+
+        // async function submitAttendanceSublime() {
+        //     const date = new Date().toISOString().split("T")[0];
+        //     const rows = document.querySelectorAll("#attendanceListSublime tr");
+        //     const attendanceData = [];
+        //     console.log("I Love you");
+
+        //     rows.forEach(row => {
+        //         const rollNo = row.cells[0].textContent;
+        //         const attendance = row.querySelector(`input[name="att_${rollNo}"]:checked`).value;
+        //         attendanceData.push({ date, rollNo, attendance });
+        //     });
+
+        //     await fetch(`${apiBaseUrl}?action=markAttendance&org=sublime`, {
+        //         method: "POST",
+        //         body: JSON.stringify(attendanceData)
+        //     });
+
+        //     alert("Attendance Sublime submitted for Today");
+        // }      
+        async function submitAttendanceSublime() {
+           const submitBtn = document.getElementById("submitBtnSublime");
+           const waitMessage = document.getElementById("waitMessageSublime");
+
+           if (submitBtn.disabled) {
+             alert("Please wait, submission in progress.");
+             return;
+            }
+
+            // Disable button and show wait message
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Submitting...";
+            waitMessage.style.display = "block";
+
+            try {
+                const date = new Date().toISOString().split("T")[0];
+                const rows = document.querySelectorAll("#attendanceListSublime tr");
+                const attendanceData = [];
+
+                 console.log("I Love you");
+
+             rows.forEach(row => {
+                const rollNo = row.cells[0].textContent;
+                const attendance = row.querySelector(`input[name="att_${rollNo}"]:checked`).value;
+                attendanceData.push({ date, rollNo, attendance });
+             });
+
+            await fetch(`${apiBaseUrl}?action=markAttendance&org=sublime`, {
+              method: "POST",
+            //   headers: {
+            //     "Content-Type": "application/json"
+            //      },
+              body: JSON.stringify(attendanceData)
+             });
+
+            alert("Attendance Sublime submitted for Today");
+            } catch (error) {
+             console.error("Error submitting Sublime attendance:", error);
+             alert("Failed to submit Sublime attendance. Please try again.");
+           } finally {
+        // Re-enable button and hide message
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Submit Sublime Attendance";
+            waitMessage.style.display = "none";
+            }
+         }
+  
+
+        async function fetchAttendanceSummary() {
+            const response = await fetch(`${apiBaseUrl}?action=getAttendance&org=focus`);
+            const data = await response.json();
+
+            const attendanceSummary = {};
+            data.forEach(record => {
+                const date = record.date.split("T")[0];
+                if (!attendanceSummary[date]) {
+                    attendanceSummary[date] = { present: 0, absent: 0 };
+                }
+                if (record.attendance === 'P') {
+                    attendanceSummary[date].present += 1;
+                } else if (record.attendance === 'A') {
+                    attendanceSummary[date].absent += 1;
+                }
+            });
+
+            const summary = document.getElementById("attendanceSummary");
+            summary.innerHTML = Object.entries(attendanceSummary).map(([date, { present, absent }]) => `
+                <tr>
+                    <td>${date}</td>
+                    <td>${present}</td>
+                    <td>${absent}</td>
+                </tr>
+            `).join('');
+        }
+
+        async function fetchAttendanceSummarySublime() {
+            const response = await fetch(`${apiBaseUrl}?action=getAttendance&org=sublime`);
+            const data = await response.json();
+
+            const attendanceSummary = {};
+            data.forEach(record => {
+                const date = record.date.split("T")[0];
+                if (!attendanceSummary[date]) {
+                    attendanceSummary[date] = { present: 0, absent: 0 };
+                }
+                if (record.attendance === 'P') {
+                    attendanceSummary[date].present += 1;
+                } else if (record.attendance === 'A') {
+                    attendanceSummary[date].absent += 1;
+                }
+            });
+
+            const summary = document.getElementById("attendanceSummarySublime");
+            summary.innerHTML = Object.entries(attendanceSummary).map(([date, { present, absent }]) => `
+                <tr>
+                    <td>${date}</td>
+                    <td>${present}</td>
+                    <td>${absent}</td>
+                </tr>
+            `).join('');
+        }        
+
+        function toggleMenu() {
+            const menu = document.querySelector('.nav-links');
+            menu.classList.toggle('active');
+        }
+
+        showPage('home');
+    </script>
+
+</body>
+</html>
